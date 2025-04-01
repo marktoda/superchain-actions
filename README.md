@@ -1,32 +1,32 @@
-# Superchain Onion Calls
+# Superchain Actions
 
 A framework for semi-atomic cross-chain operations across Optimism's superchain ecosystem with conditional execution paths.
 
-![Onion Calls Concept](https://i.imgur.com/example-placeholder.png)
+![Superchain Actions Concept](https://i.imgur.com/example-placeholder.png)
 
 ## Overview
 
-The Superchain Onion Calls system enables complex, multi-chain workflows by allowing developers to create "onion-style" call structures where each layer can conditionally trigger the next based on success or failure.
+The Superchain Actions system enables complex, multi-chain workflows by allowing developers to create nested call structures where each action can conditionally trigger the next based on success or failure.
 
 Key features:
 - **Cross-chain execution** between any OP chains (Optimism, Base, Zora, etc.)
 - **Conditional branching** with success and failure paths
-- **Nested call structures** for complex, multi-step workflows
+- **Nested action structures** for complex, multi-step workflows
 - **No token bridging required** - uses Optimism's native L2-to-L2 messaging
 
 Built on Optimism's upcoming interop solution, this system enables previously impossible cross-chain workflows with minimal coordination overhead.
 
 ## How It Works
 
-The system conceptualizes cross-chain operations as "onion layers" - each call can contain two nested calls (success and failure branches) that execute conditionally based on the outcome of the parent call:
+The system conceptualizes cross-chain operations as nested actions - each call can contain two nested calls (success and failure branches) that execute conditionally based on the outcome of the parent call:
 
-1. **Initiation**: User triggers a cross-chain call via the `execute()` function
-2. **Message Passing**: The call is sent to the target chain via Optimism's L2ToL2CrossDomainMessenger
+1. **Initiation**: User triggers a cross-chain action via the `execute()` function
+2. **Message Passing**: The action is sent to the target chain via Optimism's L2ToL2CrossDomainMessenger
 3. **Execution**: On the destination chain, the primary call executes
 4. **Conditional Branching**:
    - If successful → execute the onSuccess branch (which may target any chain)
    - If failed → execute the onFailure branch (which may target any chain)
-5. **Recursive Execution**: Each branch can contain further nested calls, creating a chain of operations
+5. **Recursive Execution**: Each branch can contain further nested actions, creating a chain of operations
 
 ## Key Components
 
@@ -34,7 +34,7 @@ The system conceptualizes cross-chain operations as "onion layers" - each call c
 
 ```solidity
 struct CrossChainCall {
-    uint256 destinationChain; // Chain ID where this call executes
+    uint256 destinationChain; // Chain ID where this action executes
     address target;           // Contract address to call
     bytes callData;           // Data to pass to the target
     bytes onSuccessData;      // Optional encoded CrossChainCall for success path
@@ -45,9 +45,9 @@ struct CrossChainCall {
 ### CrossChainExecutor Contract
 
 The universal executor contract deployed on each chain. It:
-- Initiates cross-chain operations via `execute()`
+- Initiates cross-chain actions via `execute()`
 - Processes incoming messages via `handleMessage()`
-- Handles conditional branching based on call outcomes
+- Handles conditional branching based on action outcomes
 
 ### L2ToL2CrossDomainMessenger
 
@@ -57,8 +57,8 @@ The system leverages Optimism's native L2-to-L2 messaging predeploy at `0x420000
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/superchain-onion-calls.git
-cd superchain-onion-calls
+git clone https://github.com/yourusername/superchain-actions.git
+cd superchain-actions
 
 # Install dependencies
 forge install
@@ -91,11 +91,11 @@ No constructor parameters are needed as the system automatically uses the standa
 
 ## Usage Examples
 
-### Basic Cross-Chain Call
+### Basic Cross-Chain Action
 
 ```solidity
-// Define a cross-chain call from Optimism to Base
-CrossChainCall memory call = CrossChainCall({
+// Define a cross-chain action from Optimism to Base
+CrossChainCall memory action = CrossChainCall({
     destinationChain: 8453,                                    // Base chain ID
     target: 0x1234567890123456789012345678901234567890,       // Target on Base
     callData: abi.encodeWithSelector(bytes4(keccak256("transfer(address,uint256)")), recipient, amount),
@@ -103,15 +103,15 @@ CrossChainCall memory call = CrossChainCall({
     onFailureData: bytes("")                                   // No failure branch
 });
 
-// Execute the call
-crossChainExecutor.execute(call, 8453);
+// Execute the action
+crossChainExecutor.execute(action, 8453);
 ```
 
 ### Multi-Chain Workflow with Conditional Branching
 
 ```solidity
-// Define a fallback call to execute on Zora if the main call fails
-CrossChainCall memory failureCall = CrossChainCall({
+// Define a fallback action to execute on Zora if the main action fails
+CrossChainCall memory failureAction = CrossChainCall({
     destinationChain: 999,                                    // Zora chain ID
     target: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,       // Fallback target
     callData: abi.encodeWithSelector(bytes4(keccak256("logFailure(string)")), "Main operation failed"),
@@ -119,8 +119,8 @@ CrossChainCall memory failureCall = CrossChainCall({
     onFailureData: bytes("")
 });
 
-// Define a follow-up call to execute on Optimism if the main call succeeds
-CrossChainCall memory successCall = CrossChainCall({
+// Define a follow-up action to execute on Optimism if the main action succeeds
+CrossChainCall memory successAction = CrossChainCall({
     destinationChain: 10,                                     // Optimism chain ID
     target: 0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB,       // Success target
     callData: abi.encodeWithSelector(bytes4(keccak256("finalizeOperation(uint256)")), operationId),
@@ -128,17 +128,17 @@ CrossChainCall memory successCall = CrossChainCall({
     onFailureData: bytes("")
 });
 
-// Define the main call to execute on Base with nested branches
-CrossChainCall memory mainCall = CrossChainCall({
+// Define the main action to execute on Base with nested branches
+CrossChainCall memory mainAction = CrossChainCall({
     destinationChain: 8453,                                   // Base chain ID
     target: 0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,       // Main target
     callData: abi.encodeWithSelector(bytes4(keccak256("processOperation(uint256)")), operationId),
-    onSuccessData: abi.encode(successCall),                   // On success → Optimism
-    onFailureData: abi.encode(failureCall)                    // On failure → Zora
+    onSuccessData: abi.encode(successAction),                 // On success → Optimism
+    onFailureData: abi.encode(failureAction)                  // On failure → Zora
 });
 
 // Start the workflow from any chain
-crossChainExecutor.execute(mainCall, 8453);
+crossChainExecutor.execute(mainAction, 8453);
 ```
 
 ## Security Considerations
@@ -146,7 +146,7 @@ crossChainExecutor.execute(mainCall, 8453);
 - **Semi-Atomicity**: While each chain's execution is atomic, the entire cross-chain process is not fully atomic. Design workflows with this in mind.
 - **Authentication**: Only the L2ToL2CrossDomainMessenger can invoke `handleMessage()`, preventing unauthorized calls.
 - **Chain Validation**: Messages are validated to ensure they're executed on the correct chain.
-- **Nested Call Failure**: Local execution failures in nested calls revert with the `CallFailed` error.
+- **Nested Action Failure**: Local execution failures in nested actions revert with the `CallFailed` error.
 
 ## Limitations
 
