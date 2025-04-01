@@ -10,18 +10,14 @@ struct CrossChainCall {
     /// @notice Chain ID where the call should be executed
     /// @dev Must match the block.chainid where this call is being processed
     uint256 destinationChain;
-
     /// @notice Target contract address to call on the destination chain
     address target;
-
     /// @notice Calldata to pass to the target contract
     bytes callData;
-
     /// @notice Optional encoded CrossChainCall to execute if the primary call succeeds
     /// @dev Empty bytes indicates no onSuccess branch
     ///      Non-empty bytes must be an abi.encoded CrossChainCall struct
     bytes onSuccessData;
-
     /// @notice Optional encoded CrossChainCall to execute if the primary call fails
     /// @dev Empty bytes indicates no onFailure branch
     ///      Non-empty bytes must be an abi.encoded CrossChainCall struct

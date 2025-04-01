@@ -21,7 +21,7 @@ library CrossChainCallLibrary {
     /// @param target The target address for the call
     /// @param local Whether the call was executed locally (true) or dispatched cross-chain (false)
     event NestedCallDispatched(uint256 destinationChain, address target, bool local);
-    
+
     /// @notice Thrown when a nested local call fails
     error CallFailed();
 

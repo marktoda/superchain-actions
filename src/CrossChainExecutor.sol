@@ -39,9 +39,7 @@ contract CrossChainExecutor is ICrossChainExecutor {
     /// @param destinationChain The chain ID where the call should be executed
     function execute(CrossChainCall calldata call, uint256 destinationChain) external {
         CrossChainCallLibrary.MESSENGER.sendMessage(
-            destinationChain, 
-            address(this), 
-            abi.encodeWithSelector(CrossChainExecutor.handleMessage.selector, call)
+            destinationChain, address(this), abi.encodeWithSelector(CrossChainExecutor.handleMessage.selector, call)
         );
     }
 
