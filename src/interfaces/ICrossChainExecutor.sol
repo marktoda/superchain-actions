@@ -31,8 +31,7 @@ struct CrossChainCall {
 interface ICrossChainExecutor {
     /// @notice Initiates a cross-chain call to the specified destination chain
     /// @param call The cross-chain call to execute
-    /// @param destinationChain The chain ID where the call should be executed
-    function execute(CrossChainCall calldata call, uint256 destinationChain) external;
+    function execute(CrossChainCall calldata call) external;
 
     /// @notice Processes an incoming cross-chain message
     /// @dev Should only be callable by the authorized cross-chain messenger
