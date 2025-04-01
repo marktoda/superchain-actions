@@ -2,13 +2,12 @@
 
 A framework for semi-atomic cross-chain operations across Optimism's superchain ecosystem with conditional execution paths.
 
-![Superchain Actions Concept](https://i.imgur.com/example-placeholder.png)
-
 ## Overview
 
 The Superchain Actions system enables complex, multi-chain workflows by allowing developers to create nested call structures where each action can conditionally trigger the next based on success or failure.
 
 Key features:
+
 - **Cross-chain execution** between any OP chains (Optimism, Base, Zora, etc.)
 - **Conditional branching** with success and failure paths
 - **Nested action structures** for complex, multi-step workflows
@@ -45,6 +44,7 @@ struct CrossChainCall {
 ### CrossChainExecutor Contract
 
 The universal executor contract deployed on each chain. It:
+
 - Initiates cross-chain actions via `execute()`
 - Processes incoming messages via `handleMessage()`
 - Handles conditional branching based on action outcomes
@@ -157,3 +157,4 @@ crossChainExecutor.execute(mainAction, 8453);
 ## License
 
 MIT
+
