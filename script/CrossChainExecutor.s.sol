@@ -10,6 +10,8 @@ import "../src/CrossChainExecutor.sol";
 ///      The contract automatically uses the standard L2ToL2CrossDomainMessenger
 ///      address (0x4200000000000000000000000000000000000023) on OP chains
 contract CrossChainExecutorScript is Script {
+    bytes32 salt = keccak256("executor");
+
     /// @notice Deploys a new instance of the CrossChainExecutor contract
     /// @dev No constructor parameters needed as the messenger address is hardcoded
     ///      via the Predeploys library in the CrossChainCallLibrary
@@ -17,7 +19,7 @@ contract CrossChainExecutorScript is Script {
         vm.startBroadcast();
 
         // Deploy the CrossChainExecutor
-        new CrossChainExecutor();
+        new CrossChainExecutor{salt: salt}();
 
         vm.stopBroadcast();
     }

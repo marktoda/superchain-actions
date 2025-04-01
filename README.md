@@ -8,16 +8,15 @@ The Superchain Actions system enables complex, multi-chain workflows by allowing
 
 Key features:
 
-- **Cross-chain execution** between any OP chains (Optimism, Base, Zora, etc.)
+- **Cross-chain execution** between any Superchain chains
 - **Conditional branching** with success and failure paths
 - **Nested action structures** for complex, multi-step workflows
-- **No token bridging required** - uses Optimism's native L2-to-L2 messaging
 
 Built on Optimism's upcoming interop solution, this system enables previously impossible cross-chain workflows with minimal coordination overhead.
 
 ## How It Works
 
-The system conceptualizes cross-chain operations as nested actions - each call can contain two nested calls (success and failure branches) that execute conditionally based on the outcome of the parent call:
+The system conceptualizes cross-chain operations as nested actions - each call can contain two nested post hooks (success and failure branches) that execute conditionally based on the outcome of the parent call:
 
 1. **Initiation**: User triggers a cross-chain action via the `execute()` function
 2. **Message Passing**: The action is sent to the target chain via Optimism's L2ToL2CrossDomainMessenger
@@ -57,7 +56,7 @@ The system leverages Optimism's native L2-to-L2 messaging predeploy at `0x420000
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/superchain-actions.git
+git clone https://github.com/marktoda/superchain-actions.git
 cd superchain-actions
 
 # Install dependencies
@@ -78,7 +77,7 @@ forge test
 
 ## Deployment
 
-Deploy to any OP chain (Base, Optimism, Zora, etc.):
+Deploy to any OP chain
 
 ```bash
 forge script script/CrossChainExecutor.s.sol:CrossChainExecutorScript \
@@ -94,9 +93,9 @@ No constructor parameters are needed as the system automatically uses the standa
 ### Basic Cross-Chain Action
 
 ```solidity
-// Define a cross-chain action from Optimism to Base
+// Define a cross-chain action to Unichain
 CrossChainCall memory action = CrossChainCall({
-    destinationChain: 8453,                                    // Base chain ID
+    destinationChain: 130,                                    // Unichain chain ID
     target: 0x1234567890123456789012345678901234567890,       // Target on Base
     callData: abi.encodeWithSelector(bytes4(keccak256("transfer(address,uint256)")), recipient, amount),
     onSuccessData: bytes(""),                                  // No success branch
@@ -104,22 +103,22 @@ CrossChainCall memory action = CrossChainCall({
 });
 
 // Execute the action
-crossChainExecutor.execute(action, 8453);
+crossChainExecutor.execute(action);
 ```
 
 ### Multi-Chain Workflow with Conditional Branching
 
 ```solidity
-// Define a fallback action to execute on Zora if the main action fails
+// Define a fallback action to execute on Unichain if the main action fails
 CrossChainCall memory failureAction = CrossChainCall({
-    destinationChain: 999,                                    // Zora chain ID
+    destinationChain: 130,                                    // Unichain chain ID
     target: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,       // Fallback target
     callData: abi.encodeWithSelector(bytes4(keccak256("logFailure(string)")), "Main operation failed"),
     onSuccessData: bytes(""),
     onFailureData: bytes("")
 });
 
-// Define a follow-up action to execute on Optimism if the main action succeeds
+// Define a follow-up action to execute on OP mainnet if the main action succeeds
 CrossChainCall memory successAction = CrossChainCall({
     destinationChain: 10,                                     // Optimism chain ID
     target: 0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB,       // Success target
@@ -128,13 +127,13 @@ CrossChainCall memory successAction = CrossChainCall({
     onFailureData: bytes("")
 });
 
-// Define the main action to execute on Base with nested branches
+// Define the main action to execute on OP mainnet with nested branches
 CrossChainCall memory mainAction = CrossChainCall({
-    destinationChain: 8453,                                   // Base chain ID
+    destinationChain: 10,                                     // OP mainnet chain ID
     target: 0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,       // Main target
     callData: abi.encodeWithSelector(bytes4(keccak256("processOperation(uint256)")), operationId),
-    onSuccessData: abi.encode(successAction),                 // On success → Optimism
-    onFailureData: abi.encode(failureAction)                  // On failure → Zora
+    onSuccessData: abi.encode(successAction),                 // On success → OP mainnet
+    onFailureData: abi.encode(failureAction)                  // On failure → Unichain
 });
 
 // Start the workflow from any chain
@@ -150,11 +149,10 @@ crossChainExecutor.execute(mainAction, 8453);
 
 ## Limitations
 
-- **OP Chain Only**: Only works within the Optimism superchain ecosystem (Optimism, Base, Zora, etc.)
+- **Suprechain Only**: Only works within the Optimism superchain ecosystem
 - **Message Reliability**: Depends on Optimism's interop messaging system and relayer network
 - **Response Latency**: Cross-chain operations are subject to finality periods and may take several minutes to complete
 
 ## License
 
 MIT
-

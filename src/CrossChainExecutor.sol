@@ -36,10 +36,11 @@ contract CrossChainExecutor is ICrossChainExecutor {
     /// @notice Initiates the cross-chain batch execution
     /// @dev Sends the call to the specified destination chain via the messenger
     /// @param call The top-level cross-chain call (first action)
-    /// @param destinationChain The chain ID where the call should be executed
-    function execute(CrossChainCall calldata call, uint256 destinationChain) external {
+    function execute(CrossChainCall calldata call) external {
         CrossChainCallLibrary.MESSENGER.sendMessage(
-            destinationChain, address(this), abi.encodeWithSelector(CrossChainExecutor.handleMessage.selector, call)
+            call.destinationChain,
+            address(this),
+            abi.encodeWithSelector(CrossChainExecutor.handleMessage.selector, call)
         );
     }
 
