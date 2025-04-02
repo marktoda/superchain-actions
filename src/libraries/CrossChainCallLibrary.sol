@@ -36,7 +36,10 @@ library CrossChainCallLibrary {
             return;
         }
 
-        CrossChainCallLibrary.doCall(abi.decode(call.onSuccessData, (CrossChainCall)));
+        CrossChainCall memory nextCall = abi.decode(call.onSuccessData, (CrossChainCall));
+        // ensure the next initiator is propagated down
+        nextCall.initiator = call.initiator;
+        CrossChainCallLibrary.doCall(nextCall);
     }
 
     /// @notice Processes the onFailure branch of a CrossChainCall
@@ -49,7 +52,10 @@ library CrossChainCallLibrary {
             return;
         }
 
-        CrossChainCallLibrary.doCall(abi.decode(call.onFailureData, (CrossChainCall)));
+        CrossChainCall memory nextCall = abi.decode(call.onFailureData, (CrossChainCall));
+        // ensure the next initiator is propagated down
+        nextCall.initiator = call.initiator;
+        CrossChainCallLibrary.doCall(nextCall);
     }
 
     /// @notice Executes a CrossChainCall, either locally or by sending it to another chain

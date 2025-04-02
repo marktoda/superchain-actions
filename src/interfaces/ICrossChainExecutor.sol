@@ -22,6 +22,9 @@ struct CrossChainCall {
     /// @dev Empty bytes indicates no onFailure branch
     ///      Non-empty bytes must be an abi.encoded CrossChainCall struct
     bytes onFailureData;
+    /// @notice The original sender who initiated the first cross-chain call
+    /// @dev This address is preserved across chain hops to maintain sender identity
+    address initiator;
 }
 
 /// @title ICrossChainExecutor
