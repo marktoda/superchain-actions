@@ -23,6 +23,7 @@ library CrossChainCallLibrary {
     event NestedCallDispatched(uint256 destinationChain, address target, bool local);
 
     /// @notice Thrown when a nested local call fails
+    /// @dev This error is raised when a locally executed call returns false
     error CallFailed();
 
     /// @notice Processes the onSuccess branch of a CrossChainCall

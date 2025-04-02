@@ -25,6 +25,10 @@ contract CrossChainExecutor is ICrossChainExecutor {
     /// @dev This occurs when a call's destinationChain doesn't match the current block.chainid
     error InvalidChain();
 
+    /// @notice Thrown when the cross-domain sender is not authorized
+    /// @dev This ensures only calls originating from this contract on other chains are processed
+    error InvalidCrossDomainSender();
+
     /// @notice Restricts function access to the L2ToL2CrossDomainMessenger
     /// @dev This ensures that cross-chain messages can only be processed if they
     ///      come through the official messenger contract
@@ -49,10 +53,10 @@ contract CrossChainExecutor is ICrossChainExecutor {
     ///      and dispatches the next call based on success or failure
     /// @param call The encoded CrossChainCall payload
     function handleMessage(CrossChainCall calldata call) external onlyMessenger {
-        // Ensure the call is meant for this chain
-        if (call.destinationChain != block.chainid) {
-            revert InvalidChain();
-        }
+        // Ensure the message is from this contract on another chain
+        (address crossDomainMessageSender, uint256 sourceChain) =
+            CrossChainCallLibrary.MESSENGER.crossDomainMessageContext();
+        if (crossDomainMessageSender != address(this)) revert InvalidCrossDomainSender();
 
         // Execute the primary action
         (bool success,) = call.target.call(call.callData);
@@ -61,7 +65,7 @@ contract CrossChainExecutor is ICrossChainExecutor {
         // Process the appropriate branch based on call outcome
         if (success) {
             call.onSuccess();
-        } else if (!success) {
+        } else {
             call.onFailure();
         }
     }
